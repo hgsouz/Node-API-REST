@@ -1,10 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { knexDb } from "../database.js";
 import { z } from "zod";
-import { title } from "node:process";
-import knex from "knex";
-import { id } from "zod/locales";
 import { randomUUID } from "node:crypto";
+import { knexDb } from "../database.js";
 
 // Definição do plugin presente no fastify, o que nos premite criar a rota aqui e utilizar em nosso app
 export async function transactionRoutes(app: FastifyInstance) {
@@ -13,17 +10,17 @@ export async function transactionRoutes(app: FastifyInstance) {
   /* Para a criação de rotas com fastify passamos apenas o verbo em função, passando o primeiro 
     parâmetro como o destino e o segundo um callback com nosso retorno. */
   app.post("/", async (request, reply) => {
-    const createTransactBodySchema = z.object({
+    const createTransactionBodySchema = z.object({
       title: z.string(),
       amount: z.number(),
       type: z.enum(["credit", "debit"]),
     });
 
-    const { title, amount, type } = createTransactBodySchema.parse(
+    const { title, amount, type } = createTransactionBodySchema.parse(
       request.body,
     );
 
-    const transaction = await knex("transactions").insert({
+    await knexDb("transaction").insert({
       id: randomUUID(),
       title,
       amount: type == "credit" ? amount : amount * -1,
