@@ -10,12 +10,27 @@ funcionalidades estejam de acordo com o solicitado, os principais testes são:
 */
 //==================================================================================================
 
-import { expect, test } from "vitest";
+import { test, beforeAll, afterAll } from "vitest";
+import request from "supertest";
+import { app } from "../src/app.js";
 
-test("The user can create a new transaction", () => {
-  // Here we're going to make a HTTP request to create a new transaction
+// Garantir que a aplicação esteja pronta antes dos testes
+beforeAll(async () => {
+  await app.ready();
+});
 
-  // Fazemos a validação que desejamos, que no caso é verificar se retorna um 201 (hard code de exemplo)
-  const responseatusCode = 201;
-  expect(responseatusCode).toEqual(201);
+// "Apagar" toda a aplicação após terminar o teste
+afterAll(async () => {
+  await app.close;
+});
+
+test("The user can create a new transaction", async () => {
+  const response = await request(app.server)
+    .post("./transactions")
+    .send({
+      title: "New transaction",
+      amount: 5000,
+      type: "credit",
+    })
+    .expect(201);
 });
