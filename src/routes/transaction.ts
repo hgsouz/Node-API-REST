@@ -100,48 +100,42 @@ export async function transactionRoutes(app: FastifyInstance) {
     },
   );
 
-  app.post(
-    "/",
-    {
-      preHandler: [checkSessionIdExists],
-    },
-    async (request, reply) => {
-      const createTransactionBodySchema = z.object({
-        title: z.string(),
-        amount: z.number(),
-        type: z.enum(["credit", "debit"]),
-      });
+  app.post("/", async (request, reply) => {
+    const createTransactionBodySchema = z.object({
+      title: z.string(),
+      amount: z.number(),
+      type: z.enum(["credit", "debit"]),
+    });
 
-      const { title, amount, type } = createTransactionBodySchema.parse(
-        request.body,
-      );
+    const { title, amount, type } = createTransactionBodySchema.parse(
+      request.body,
+    );
 
-      /* 
+    /* 
     Aqui temos a definição do nosso cookie utilizando o proprio modulo do fastify 
     sobre cookies, e ele segue a seguinte ordem:
     - Primeiro uma variável que pode ser alterada com os meta dados de cookie do browser
     - Depois uma validação se o user já possuí ou não um sessionId (caso não ele cria via randomUUID)
     - E por fim mandamos essa informação junto ao nosso post
     */
-      let session_id = request.cookies.session_id;
+    let session_id = request.cookies.session_id;
 
-      if (!session_id) {
-        session_id = randomUUID();
+    if (!session_id) {
+      session_id = randomUUID();
 
-        reply.cookie("session_id", session_id, {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-        });
-      }
-
-      await knexDb("transaction").insert({
-        id: randomUUID(),
-        title,
-        amount: type == "credit" ? amount : amount * -1,
-        session_id: session_id,
+      reply.cookie("session_id", session_id, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
       });
+    }
 
-      return reply.status(201).send();
-    },
-  );
+    await knexDb("transaction").insert({
+      id: randomUUID(),
+      title,
+      amount: type == "credit" ? amount : amount * -1,
+      session_id: session_id,
+    });
+
+    return reply.status(201).send();
+  });
 }

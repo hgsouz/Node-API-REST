@@ -25,10 +25,10 @@ afterAll(async () => {
 });
 
 test("The user can create a new transaction", async () => {
-  const response = await request(app.server)
-    .post("./transactions")
+  await request(app.server)
+    .post("/transactions")
     .send({
-      title: "New transaction",
+      title: "Free-lancer",
       amount: 5000,
       type: "credit",
     })
