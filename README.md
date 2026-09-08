@@ -74,5 +74,129 @@ Node-API-REST/
 │   │   └── check-session-id-exists.ts # Middleware que valida o cookie de sessão
 │   ├── routes/
 │   │   └── transaction.ts             # Rotas de transações (criar, listar, buscar, resumo)
-│   ├──
+│   ├── app.ts                         # Instância e configuração do Fastify (plugins e rotas)
+│   ├── database.ts                    # Configuração da conexão do Knex com o banco
+│   └── server.ts                      # Ponto de entrada: sobe o servidor HTTP
+├── test/                              # Testes automatizados (Vitest + Supertest)
+├── knexfile.ts                        # Configuração de conexão e migrations do Knex
+├── .env.example                       # Modelo de variáveis de ambiente
+├── .env.test.example                  # Modelo de variáveis de ambiente para testes
+└── package.json
 ```
+
+## 🚀 Como rodar o projeto
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) instalado
+- Um cliente HTTP para testar as rotas (Insomnia, Postman, etc.)
+
+### Passo a passo
+
+```bash
+# Clone o repositório
+git clone https://github.com/hgsouz/Node-API-REST.git
+
+# Acesse a pasta do projeto
+cd Node-API-REST
+
+# Instale as dependências
+npm install
+
+# Copie os arquivos de variáveis de ambiente
+cp .env.example .env
+cp .env.test.example .env.test
+
+# Rode as migrations do banco de dados
+npm run knex -- migrate:latest
+
+# Inicie o servidor em modo desenvolvimento
+npm run dev
+```
+
+## 📜 Scripts disponíveis
+
+| Comando         | Descrição                                                            |
+| --------------- | -------------------------------------------------------------------- |
+| `npm run dev`   | Sobe o servidor em modo desenvolvimento com hot-reload (`tsx watch`) |
+| `npm run knex`  | Executa comandos do Knex CLI (migrations, seeds, etc.)               |
+| `npm run build` | Gera o build de produção com `tsup`                                  |
+| `npm test`      | Executa a suíte de testes automatizados com Vitest                   |
+
+## 🍪 Autenticação por cookies
+
+Ao criar a primeira transação, a API gera um identificador de sessão (`sessionId`) e o envia como cookie na resposta. Esse cookie é reutilizado nas próximas requisições para:
+
+- Vincular novas transações ao mesmo usuário;
+- Filtrar listagens e resumos, garantindo que cada usuário veja **apenas** as próprias transações.
+
+## 🔌 Endpoints
+
+Todas as rotas ficam sob o prefixo `/transactions`.
+
+| Método | Rota                    | Descrição                                         | Requer cookie?                    |
+| ------ | ----------------------- | ------------------------------------------------- | --------------------------------- |
+| `POST` | `/transactions`         | Cria uma nova transação (crédito ou débito)       | Não (cria o cookie na 1ª chamada) |
+| `GET`  | `/transactions`         | Lista todas as transações do usuário              | Sim                               |
+| `GET`  | `/transactions/:id`     | Retorna uma transação específica pelo ID          | Sim                               |
+| `GET`  | `/transactions/summary` | Retorna o resumo (soma) das transações do usuário | Sim                               |
+
+## 🧑‍💻 Exemplos de requisições (testando o deploy)
+
+Você pode testar a API já em produção usando a URL abaixo, sem precisar rodar nada localmente:
+
+```
+https://node-api-rest-r6gs.onrender.com
+```
+
+Como a autenticação é feita por **cookie de sessão**, ao testar via `curl` é importante usar um "cookie jar" (`-c` para salvar o cookie recebido e `-b` para reenviá-lo), para que as requisições seguintes sejam reconhecidas como do mesmo usuário. Se estiver usando **Insomnia** ou **Postman**, basta manter os cookies habilitados (eles fazem isso automaticamente).
+
+### 1. Criar uma transação (crédito)
+
+```bash
+curl -c cookies.txt -X POST https://node-api-rest-r6gs.onrender.com/transactions \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Salário", "amount": 5000, "type": "credit"}'
+```
+
+### 2. Criar uma transação (débito)
+
+```bash
+curl -b cookies.txt -c cookies.txt -X POST https://node-api-rest-r6gs.onrender.com/transactions \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Aluguel", "amount": 1500, "type": "debit"}'
+```
+
+### 3. Listar todas as transações
+
+```bash
+curl -b cookies.txt https://node-api-rest-r6gs.onrender.com/transactions
+```
+
+### 4. Buscar uma transação específica
+
+Pegue o `id` retornado na listagem acima e substitua abaixo:
+
+```bash
+curl -b cookies.txt https://node-api-rest-r6gs.onrender.com/transactions/<id-da-transacao>
+```
+
+### 5. Obter o resumo (saldo)
+
+```bash
+curl -b cookies.txt https://node-api-rest-r6gs.onrender.com/transactions/summary
+```
+
+> 💡 O arquivo `cookies.txt` guarda o `session_id` gerado no primeiro `POST`. Sem reenviá-lo (`-b cookies.txt`), as rotas de leitura retornam `401 Unauthorized`, já que ninguém consegue ver transações sem se identificar.
+
+## 🧪 Testes
+
+Os testes automatizados cobrem os fluxos principais da API (criação, listagem, visualização única e resumo de transações), utilizando **Vitest** para execução e **Supertest** para as requisições HTTP.
+
+```bash
+npm test
+```
+
+---
+
+<p align="center">Desenvolvido por <a href="https://github.com/hgsouz">Hugo Souza</a> junto à <a href="https://www.rocketseat.com.br">Rocketseat</a></p>
