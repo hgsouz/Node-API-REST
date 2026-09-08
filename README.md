@@ -30,8 +30,8 @@ Esta API permite que um usuário registre transações financeiras — **crédit
 ## 📐 Regras de negócio
 
 - [x] A transação pode ser do tipo **crédito**, que soma ao valor total, ou **débito**, que subtrai
-- [ ] Deve ser possível identificar o usuário entre as requisições (via cookie de sessão)
-- [ ] O usuário só pode visualizar as transações que ele mesmo criou
+- [x] Deve ser possível identificar o usuário entre as requisições (via cookie de sessão)
+- [x] O usuário só pode visualizar as transações que ele mesmo criou
 
 ## 🛠️ Tecnologias e bibliotecas
 
@@ -130,4 +130,4 @@ npm test
 
 ---
 
-<p align="center">Desenvolvido por <a href="https://github.com/hgsouz">Hugo Souza</a></p>
+<p align="center">Desenvolvido por <a href="https://github.com/hgsouz">Hugo Souza</a> junto à <a href="https://app.rocketseat.com.br">Rocketseat</a></p>
