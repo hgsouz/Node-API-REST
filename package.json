@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "knex": "node --import tsx ./node_modules/.bin/knex",
+    "build": "tsup src --out-dir build",
     "test": "vitest"
   },
   "keywords": [],
@@ -26,6 +27,7 @@
     "dotenv": "^17.4.2",
     "knex": "^3.3.0",
     "sqlite3": "^6.0.1",
+    "tsup": "^8.5.1",
     "zod": "^4.5.4"
   }
 }
