@@ -3,8 +3,14 @@
 de forma alguma, ou entáo alguma informa;áo do front seja recebida com o parametro ou tipo errado.*/
 // -----------------------------------------------------------------------------------------------
 
-import "dotenv/config";
+import { config } from "dotenv";
 import { z } from "zod";
+
+if (process.env.NODE_ENV === "test") {
+  config({ path: ".env.test" });
+} else {
+  config();
+}
 
 // Primeiramente criamos um schema para tipar as variáveis de ambiente
 const envSchema = z.object({
