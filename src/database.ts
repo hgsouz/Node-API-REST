@@ -1,9 +1,10 @@
+import { en } from "zod/locales";
 import { env } from "./env/index.js";
 import knex, { type Knex } from "knex";
 export const setupKnex = knex;
 
 export const config: Knex.Config = {
-  client: "sqlite",
+  client: env.DATABASE_CLIENT,
   connection:
     env.DATABASE_CLIENT === "sqlite"
       ? {
