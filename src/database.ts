@@ -9,7 +9,13 @@ export const config: Knex.Config = {
       ? {
           filename: env.DATABASE_URL,
         }
-      : env.DATABASE_URL,
+      : {
+          connectionString: env.DATABASE_URL,
+          ssl:
+            env.NODE_ENV === "production"
+              ? { rejectUnauthorized: false }
+              : false,
+        },
   useNullAsDefault: true,
   migrations: {
     extension: "ts",
