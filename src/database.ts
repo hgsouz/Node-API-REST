@@ -1,4 +1,3 @@
-import { en } from "zod/locales";
 import { env } from "./env/index.js";
 import knex, { type Knex } from "knex";
 export const setupKnex = knex;
